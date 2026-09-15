@@ -1,0 +1,35 @@
+import { SiteSettings } from './types';
+
+export const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  site_name: 'TechKnowledge',
+  logo: '/logo.png',
+  site_description: 'Clear, practical explanations of the technology shaping our world.',
+  about_information: '',
+  contact_email: '',
+  admin_email: '',
+  contact_phone: '',
+  address: '',
+  social_links: {
+    twitter: '',
+    linkedin: '',
+    github: '',
+  },
+  footer_information: '',
+  default_seo_title: 'TechKnowledge | Understand Technology. Simply.',
+  default_seo_description: 'Clear, practical explanations of the technology shaping our world.',
+  default_canonical_url: 'https://techknowledge.com',
+  advertising_custom_price: '',
+  theme: {
+    primary: '#2563eb',
+    secondary: '#1d4ed8',
+    accent: '#60a5fa',
+    background: '#ffffff',
+    surface: '#ffffff',
+    text: '#111827',
+    muted_text: '#4b5563',
+    border: '#d1d5db',
+    link: '#2563eb',
+    header: '#ffffff',
+    footer: '#111827',
+  },
+};

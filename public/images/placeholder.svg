@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <rect width="800" height="500" fill="#e5e7eb"/>
+  <rect x="70" y="80" width="660" height="340" rx="28" fill="#d1d5db"/>
+  <circle cx="230" cy="200" r="72" fill="#9ca3af"/>
+  <rect x="330" y="150" width="250" height="26" rx="13" fill="#9ca3af"/>
+  <rect x="330" y="205" width="220" height="22" rx="11" fill="#c0c4cc"/>
+  <rect x="330" y="245" width="240" height="22" rx="11" fill="#c0c4cc"/>
+  <rect x="330" y="285" width="180" height="22" rx="11" fill="#c0c4cc"/>
+  <text x="400" y="430" text-anchor="middle" font-size="28" fill="#4b5563" font-family="Arial, sans-serif">Image unavailable</text>
+</svg>

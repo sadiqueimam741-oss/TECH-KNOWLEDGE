@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "name": "Technology",
+    "slug": "technology",
+    "description": "Latest news and insights about technology"
+  },
+  {
+    "id": "3",
+    "name": "Internet",
+    "slug": "internet",
+    "description": "Internet protocols and technologies"
+  },
+  {
+    "id": "4",
+    "name": "Mobile",
+    "slug": "mobile",
+    "description": "Mobile technology and devices"
+  },
+  {
+    "id": "5",
+    "name": "Gaming",
+    "slug": "gaming",
+    "description": "Gaming technology and hardware"
+  },
+  {
+    "id": "6",
+    "name": "Hardware",
+    "slug": "hardware",
+    "description": "Computer hardware and components"
+  },
+  {
+    "id": "7",
+    "name": "Science",
+    "slug": "science",
+    "description": "Science and research"
+  },
+  {
+    "id": "8",
+    "name": "Space",
+    "slug": "space",
+    "description": "Space exploration and astronomy"
+  },
+  {
+    "id": "9",
+    "name": "Cybersecurity",
+    "slug": "cybersecurity",
+    "description": "Security and privacy"
+  },
+  {
+    "id": "10",
+    "name": "Emerging Tech",
+    "slug": "emerging-tech",
+    "description": "Emerging technologies and innovations"
+  }
+]
