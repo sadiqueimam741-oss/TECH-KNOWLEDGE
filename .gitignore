@@ -35,3 +35,6 @@ yarn-error.log*
 
 # OS
 Thumbs.db
+/dist/
+.vinext/
+.wrangler/

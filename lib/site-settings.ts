@@ -2,10 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import { SiteSettings } from './types';
 import { DEFAULT_SITE_SETTINGS } from './site-settings-defaults';
+import { executeSql, isCloudDatabaseConfigured } from './db';
 
 export { DEFAULT_SITE_SETTINGS } from './site-settings-defaults';
 
-const DATA_FILE = path.join(process.cwd(), 'data', 'site-settings.json');
+const DATA_DIR = path.join(process.cwd(), 'data');
+const DATA_FILE = path.join(DATA_DIR, 'site-settings.json');
+
+let memorySettings: SiteSettings = { ...DEFAULT_SITE_SETTINGS };
 
 function normalizeSettings(settings: Partial<SiteSettings>): SiteSettings {
   const theme = { ...DEFAULT_SITE_SETTINGS.theme, ...(settings.theme ?? {}) };
@@ -26,15 +30,41 @@ function normalizeSettings(settings: Partial<SiteSettings>): SiteSettings {
 
 export function getSiteSettings(): SiteSettings {
   try {
-    return normalizeSettings(JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')));
+    if (fs.existsSync(DATA_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+      memorySettings = normalizeSettings(parsed);
+      return memorySettings;
+    }
   } catch {
-    return DEFAULT_SITE_SETTINGS;
+    // Return memory fallback
   }
+  return memorySettings;
 }
 
 export function saveSiteSettings(settings: SiteSettings): SiteSettings {
   const normalized = normalizeSettings(settings);
-  fs.writeFileSync(DATA_FILE, JSON.stringify(normalized, null, 2), 'utf8');
+  memorySettings = normalized;
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(DATA_FILE, JSON.stringify(normalized, null, 2), 'utf8');
+  } catch {
+    // In-memory fallback for serverless
+  }
+
+  if (isCloudDatabaseConfigured()) {
+    executeSql(`
+      INSERT INTO site_settings (id, settings_json, updated_at)
+      VALUES ('default', ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        settings_json = excluded.settings_json,
+        updated_at = excluded.updated_at;
+    `, [JSON.stringify(normalized), new Date().toISOString()]).catch(err =>
+      console.error('Cloud DB settings sync error:', err)
+    );
+  }
 
   return normalized;
 }
+

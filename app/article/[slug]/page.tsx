@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getArticleBySlug, getArticles, getArticlesByCategory } from '@/lib/articles';
+import { getActiveAdvertisements } from '@/lib/advertisements';
 import ArticleCard from '@/components/ArticleCard';
 import ArticleContentClient from '@/components/ArticleContentClient';
+import AdRenderer from '@/components/AdRenderer';
 import { formatDisplayDate } from '@/lib/date';
 
 interface Props {
@@ -56,7 +58,12 @@ export default async function ArticlePage({ params }: Props) {
     notFound();
   }
 
-  // Get related articles (same category, different article)
+  // Get active ads
+  const topAds = getActiveAdvertisements('article_top');
+  const bottomAds = getActiveAdvertisements('article_bottom');
+  const sidebarAds = getActiveAdvertisements('sidebar');
+
+  // Get related articles
   const relatedArticles = getArticlesByCategory(article.category)
     .filter(a => a.id !== article.id)
     .slice(0, 3);
@@ -118,8 +125,24 @@ export default async function ArticlePage({ params }: Props) {
               </div>
             </header>
 
+            {/* In-Article Top Ad Slot */}
+            {topAds.length > 0 && (
+              <div className="my-6">
+                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block mb-1">Sponsored</span>
+                <AdRenderer ad={topAds[0]} />
+              </div>
+            )}
+
             {/* Article Body - Client Component for Markdown */}
             <ArticleContentClient content={article.content} />
+
+            {/* In-Article Bottom Ad Slot */}
+            {bottomAds.length > 0 && (
+              <div className="my-8 pt-6 border-t border-gray-100 dark:border-gray-800">
+                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block mb-1">Sponsored</span>
+                <AdRenderer ad={bottomAds[0]} />
+              </div>
+            )}
 
             {/* Tags */}
             {article.tags.length > 0 && (
@@ -204,12 +227,17 @@ export default async function ArticlePage({ params }: Props) {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            {/* Advertisement Space */}
-            <div className="card p-6 mb-8 bg-gray-100 dark:bg-gray-800">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Advertisement</p>
-              <div className="bg-gray-300 dark:bg-gray-700 h-64 rounded flex items-center justify-center">
-                <p className="text-gray-500 dark:text-gray-400 text-center">Your Advertisement Here</p>
-              </div>
+            {/* Sidebar Advertisement Slot */}
+            <div className="card p-4 mb-8 bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
+              <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider block mb-2">Advertisement</span>
+              {sidebarAds.length > 0 ? (
+                <AdRenderer ad={sidebarAds[0]} />
+              ) : (
+                <div className="bg-gray-100 dark:bg-gray-800 h-56 rounded-xl flex flex-col items-center justify-center p-4 border border-dashed border-gray-300 dark:border-gray-700 text-center">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Sidebar Ad Placement</p>
+                  <a href="/advertise" className="text-[11px] text-primary-600 hover:underline mt-1">Advertise with Us ↗</a>
+                </div>
+              )}
             </div>
 
             {/* Related Articles */}

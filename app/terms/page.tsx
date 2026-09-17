@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'TechKnowledge Terms of Service',
+  description: 'TechKnowledge Terms of Service - Rules and guidelines for using our website.',
 };
 
 export default function TermsPage() {
@@ -19,68 +19,53 @@ export default function TermsPage() {
       <div className="container-custom py-16">
         <div className="max-w-3xl mx-auto prose dark:prose-invert">
           <p className="text-gray-600 dark:text-gray-400 mb-8">
-            Last updated: {new Date().toLocaleDateString()}
+            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
 
           <h2>1. Agreement to Terms</h2>
           <p>
-            By accessing and using this website, you accept and agree to be bound by the terms and provision of this agreement.
+            By accessing and using TechKnowledge, you accept and agree to be bound by the terms and provisions of this agreement. 
+            If you do not agree to these terms, please do not use our website.
           </p>
 
-          <h2>2. Use License</h2>
+          <h2>2. Intellectual Property & Use License</h2>
           <p>
-            Permission is granted to temporarily download one copy of the materials (information or software) on TechKnowledge 
-            for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, 
-            and under this license you may not:
+            All content published on TechKnowledge—including articles, tutorials, graphics, code snippets, and site branding—is 
+            the property of TechKnowledge unless otherwise stated.
           </p>
+          <p>Permission is granted to read, share, and reference our content for personal and educational use provided that:</p>
           <ul>
-            <li>Modifying or copying the materials</li>
-            <li>Using the materials for any commercial purpose or for any public display</li>
-            <li>Attempting to decompile or reverse engineer any software contained on the website</li>
-            <li>Removing any copyright or other proprietary notations from the materials</li>
-            <li>Transferring the materials to another person or "mirroring" the materials on any other server</li>
+            <li>You attribute TechKnowledge with a direct, clickable link to the original article.</li>
+            <li>You do not republish or scrape entire articles for commercial duplication without prior written consent.</li>
+            <li>You do not attempt to decompile, reverse-engineer, or disrupt any software running on the website.</li>
           </ul>
 
-          <h2>3. Disclaimer</h2>
+          <h2>3. Disclaimer of Warranties</h2>
           <p>
-            The materials on TechKnowledge are provided on an 'as is' basis. TechKnowledge makes no warranties, expressed or implied, 
-            and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of 
-            merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+            The materials and technical guides on TechKnowledge are provided on an "as is" and "as available" basis. 
+            We make no warranties, expressed or implied, regarding completeness, reliability, or accuracy for specific application deployments.
           </p>
 
-          <h2>4. Limitations</h2>
+          <h2>4. Limitation of Liability</h2>
           <p>
-            In no event shall TechKnowledge or its suppliers be liable for any damages (including, without limitation, damages for loss of 
-            data or profit, or due to business interruption) arising out of the use or inability to use the materials on TechKnowledge.
+            In no event shall TechKnowledge, its authors, or operators be liable for any damages (including data loss, downtime, or security incidents) 
+            resulting from the application of concepts, code, or tutorials found on this site.
           </p>
 
-          <h2>5. Accuracy of Materials</h2>
+          <h2>5. External Links</h2>
           <p>
-            The materials appearing on TechKnowledge could include technical, typographical, or photographic errors. TechKnowledge does not 
-            warrant that any of the materials on the website are accurate, complete, or current.
+            TechKnowledge may contain links to third-party websites or services. We do not endorse or assume responsibility for any third-party content, 
+            products, or privacy practices.
           </p>
 
-          <h2>6. Links</h2>
+          <h2>6. Changes to Terms</h2>
           <p>
-            TechKnowledge has not reviewed all of the sites linked to its website and is not responsible for the contents of any such linked site. 
-            The inclusion of any link does not imply endorsement by TechKnowledge of the site. Use of any such linked website is at the user's own risk.
+            We reserve the right to revise these Terms of Service at any time. Continued use of the website after any revisions constitutes your acceptance of the updated terms.
           </p>
 
-          <h2>7. Modifications</h2>
+          <h2>7. Contact</h2>
           <p>
-            TechKnowledge may revise these terms of service for the website at any time without notice. By using this website, you are agreeing 
-            to be bound by the then current version of these terms of service.
-          </p>
-
-          <h2>8. Governing Law</h2>
-          <p>
-            These terms and conditions are governed by and construed in accordance with the laws of [Your Jurisdiction], 
-            and you irrevocably submit to the exclusive jurisdiction of the courts in that location.
-          </p>
-
-          <p className="text-sm text-gray-600 dark:text-gray-400 pt-8">
-            This is a placeholder terms of service. Please consult with legal counsel to create a terms of service that complies with 
-            applicable laws and regulations in your jurisdiction.
+            If you have questions about these Terms of Service, please <a href="/contact">contact us</a>.
           </p>
         </div>
       </div>

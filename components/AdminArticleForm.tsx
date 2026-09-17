@@ -98,14 +98,15 @@ export default function AdminArticleForm({ articleId }: { articleId?: string }) 
   };
 
   const handleDelete = async () => {
-    if (!form.id) return;
+    const targetId = form.id || articleId;
+    if (!targetId) return;
     const confirmed = window.confirm('Delete this article?');
     if (!confirmed) return;
 
     const response = await fetch('/api/admin/articles', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: form.id }),
+      body: JSON.stringify({ id: targetId }),
     });
 
     if (response.ok) {

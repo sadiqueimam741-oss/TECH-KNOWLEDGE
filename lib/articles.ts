@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Article, CATEGORIES } from './types';
+import { executeSql, isCloudDatabaseConfigured } from './db';
 
 const fiveGArticle = `# How Does 5G Work? A Complete Beginner's Guide
 
@@ -31,191 +32,178 @@ This entire process typically takes milliseconds.
 5G uses three main frequency bands, each with different characteristics:
 
 ### Low-Band 5G
-
 - **Frequency**: 600 MHz to 1 GHz
 - **Range**: Very good (similar to 4G LTE)
 - **Speed**: Moderate improvements over 4G (200-300 Mbps)
-- **Deployment**: Fastest to deploy
-- **Coverage**: Excellent coverage areas
+- **Coverage**: Excellent wide-area coverage
 
-Low-band 5G is the most widely available 5G today. It trades speed for coverage and penetration through walls.
+Low-band 5G is the foundation of national rollouts. It trades maximum throughput for penetration through buildings and walls.
 
 ### Mid-Band 5G
+- **Frequency**: 2.5-3.7 GHz (C-Band)
+- **Range**: Moderate (several miles from base station)
+- **Speed**: Very fast (300-900 Mbps)
+- **Coverage**: Ideal for suburban and metropolitan regions
 
-- **Frequency**: 2.5-3.7 GHz
-- **Range**: Moderate (a few miles from base station)
-- **Speed**: Very fast (100-900 Mbps)
-- **Deployment**: Currently expanding rapidly
-- **Coverage**: Good coverage in urban and suburban areas
-
-Mid-band is the "sweet spot" for 5G, balancing speed and coverage. This is where most 5G networks are focusing.
+Mid-band is considered the "sweet spot" of 5G, providing the perfect balance between high-bandwidth throughput and geographic reach.
 
 ### High-Band 5G (mmWave)
-
 - **Frequency**: 24-100 GHz (millimeter waves)
-- **Range**: Very short (few hundred feet)
+- **Range**: Very short (a few hundred feet)
 - **Speed**: Ultra-fast (1-3+ Gbps)
-- **Deployment**: Limited to dense urban areas
-- **Coverage**: Poor penetration through walls and obstacles
+- **Coverage**: Dense urban hotspots, stadiums, and transit hubs
 
-mmWave is used for specialized high-speed applications in dense areas. You must be relatively close to a base station for a connection.
+mmWave achieves blistering speeds but struggles to penetrate solid objects like concrete walls or dense foliage.
 
 ## Advanced 5G Technologies
 
 ### Massive MIMO
-
-**MIMO** stands for "Multiple Input, Multiple Output." Traditional base stations might have 4-12 antennas. **Massive MIMO** arrays have 64, 128, or even 256 antennas.
-
-These antennas work together to:
-- Direct signals specifically at devices (instead of broadcasting to everyone)
-- Receive signals more clearly
-- Increase network capacity
-- Reduce interference
-
-Think of it like a conductor directing musicians precisely rather than just playing loudly.
+**MIMO** stands for "Multiple Input, Multiple Output." Traditional 4G antennas typically utilize 4 to 8 antenna elements. Massive MIMO arrays deploy 64 or 128 elements simultaneously to transmit independent data streams to multiple users at once.
 
 ### Beamforming
+Rather than broadcasting electromagnetic energy in all directions like a traditional lightbulb, beamforming acts like a focused laser pointer, dynamically steering RF energy toward active user devices.
 
-Traditional antennas broadcast signals in all directions like light bulbs. Beamforming creates focused signal "beams" aimed directly at specific devices—like flashlights instead of light bulbs.
-
-This improves signal quality and efficiency because:
-- Less energy wasted on areas with no devices
-- Stronger signal reaching the target device
-- Better performance in crowded areas
-
-### Carrier Aggregation
-
-5G can combine multiple frequency bands simultaneously, like combining multiple traffic lanes into one super-highway. A device might use:
-- One low-band channel for coverage
-- Two mid-band channels for speed
-- One mmWave channel for ultra-speed
-
-All at the same time.
-
-## 5G Network Deployment Models
-
-### 5G NSA (Non-Standalone)
-
-NSA still depends on 4G infrastructure for certain functions, particularly the core network. Current 5G deployments are mostly NSA.
-
-**Advantages**:
-- Faster deployment
-- Uses existing infrastructure
-- Lower initial cost
-
-**Limitations**:
-- Not true 5G latency in all scenarios
-- Dependent on 4G availability
-
-### 5G SA (Standalone)
-
-SA is "true" 5G where the entire network, including the core, is 5G-native. This is the long-term goal.
-
-**Advantages**:
-- True low-latency performance
-- More network slicing capabilities
-- Better for IoT and enterprise
-
-**Current status**:
-- Limited deployment
-- Requires complete infrastructure overhaul
-
-## 5G Core Network
-
-Unlike previous generations that just improved the "last mile" (device to base station), 5G replaces the entire core network infrastructure.
-
-Key features:
-- **Cloud-based**: Runs on standard computing hardware
-- **Network Slicing**: Creates multiple virtual networks on one infrastructure
-- **Edge Computing**: Processes data closer to devices, reducing latency
-- **API-first design**: Better integration with applications
-
-## Latency: Why It Matters
-
-Latency is the delay between sending and receiving data.
-
-- **4G LTE**: ~50-100ms
-- **5G**: ~1-10ms (in ideal conditions)
-- **Fiber**: ~1-5ms
-
-Why this matters:
-- **Gaming**: Lower latency = more responsive gameplay
-- **Autonomous vehicles**: Latency could mean life or death
-- **Virtual reality**: Latency causes motion sickness
-- **Remote surgery**: Precision depends on low latency
-
-## Why 5G Speeds Vary
-
-You might see "5G" but get slower speeds than expected. Here's why:
-
-1. **Congestion**: Many users on one base station share bandwidth
-2. **Distance**: Farther from base station = weaker signal
-3. **Obstacles**: Buildings, trees, rain degrade signal
-4. **Band type**: Low-band 5G is inherently slower than mid or high-band
-5. **Device limitations**: Your phone's modem might not support all bands
-6. **Time of day**: Networks are slower during peak hours
-
-## Why 5G Can Sometimes Be Slower Than Expected
-
-This seems counterintuitive, but can happen because:
-
-1. **Overhead**: 5G has more signaling overhead than 4G
-2. **Fallback**: If 5G connection is poor, you fall back to 4G
-3. **Device modem limits**: Your phone's modem might not handle data as fast as the network can deliver
-4. **Carrier implementation**: Different carriers optimize differently
-5. **Shared resources**: Network slicing means the network might prioritize other traffic
-
-## Real-World Example: Loading a Website
-
-Let's trace what happens when you load a website on 5G:
-
-1. **Connection**: Phone connects to 5G base station (1-5ms)
-2. **DNS lookup**: Browser looks up the IP address for the website (10-50ms)
-3. **TCP connection**: Establishes connection to server (10-100ms, depending on server location)
-4. **TLS handshake**: Establishes secure connection (10-100ms)
-5. **HTTP request**: Sends page request (1-5ms)
-6. **Server processing**: Server prepares response (10-500ms)
-7. **Download**: Page content downloads (depends on file size)
-8. **Rendering**: Browser renders the page (depends on complexity)
-
-**Total time**: 100ms-3 seconds depending on all factors
-
-## 4G vs 5G Comparison
-
-| Feature | 4G LTE | 5G |
-|---------|--------|-----|
-| Peak Speed | 100 Mbps | 10 Gbps |
-| Latency | 50-100ms | 1-10ms |
-| Connection per area | 100s | 1000s |
-| Frequencies | 600 MHz - 6 GHz | 600 MHz - 100 GHz |
-| Architecture | RAN + Core | Cloud-based |
-| Power efficiency | Good | Better |
-| Use cases | Web, streaming, calls | Everything + AR/VR, autonomous vehicles |
-
-## Common 5G Misconceptions
-
-### "5G is a replacement for fiber"
-False. 5G is wireless; it has different strengths and weaknesses than fiber. Both exist together.
-
-### "5G is dangerous/causes cancer"
-False. 5G uses non-ionizing radiation. Studies have found no credible link to health problems. The radio waves are lower energy than visible light.
-
-### "5G works everywhere immediately"
-False. 5G is still rolling out. Coverage varies by region and carrier. Many areas remain 4G-only.
-
-### "All 5G phones are equally fast"
-False. Different devices support different bands. A phone supporting all bands will be faster than one supporting only low-band.
-
-### "5G uses less data"
-False. Data usage depends on what you do, not the network. Faster speeds might *enable* more data usage (like streaming 4K video).
+### Network Slicing
+Network slicing allows telecom providers to partition a single physical 5G network into multiple isolated virtual networks customized for specific latency and bandwidth requirements (e.g., autonomous vehicles vs. video streaming).
 
 ## Conclusion
+5G represents an infrastructure shift that powers connected IoT ecosystems, telemedicine, and next-generation mobile experiences. As coverage expands globally, understanding how these underlying radio frequencies and antenna architectures operate helps users make informed device and connectivity decisions.`;
 
-5G is a dramatic improvement over 4G, but it's not "magic." It combines higher frequencies, smarter antennas, more infrastructure, and better network architecture to deliver faster, lower-latency connections.
+const aiArticle = `# Artificial Intelligence Explained: A Complete Beginner's Guide
 
-Understanding these fundamentals helps you evaluate 5G coverage claims, choose devices wisely, and appreciate what's actually happening when your phone connects to the network.
+Artificial Intelligence (AI) has transformed from science fiction into an indispensable technology powering modern software, search engines, creative tools, and autonomous robotics. But what actually happens behind the scenes?
 
-The rollout will continue for years. Keep an eye on your region's 5G availability and 5G-capable phones as they become more mainstream.`;
+## The Core Concept of AI
+
+At its simplest level, Artificial Intelligence refers to computational systems engineered to perform tasks that historically required human cognitive ability. These tasks include pattern recognition, natural language comprehension, logical decision-making, and visual interpretation.
+
+AI is best understood as a hierarchy of concepts:
+
+1. **Artificial Intelligence (Broadest)**: Any machine technique that mimics human problem-solving.
+2. **Machine Learning (Subset of AI)**: Algorithms that learn predictive patterns directly from historical data rather than following static, hardcoded rules.
+3. **Deep Learning (Subset of ML)**: Neural networks structured with dozens or hundreds of computational layers modeled loosely after biological brains.
+4. **Generative AI & LLMs (Modern Frontier)**: Neural models trained on massive text, code, or visual corpora to generate new, original content.
+
+## How Do Neural Networks Learn?
+
+Modern AI relies on artificial neural networks composed of interconnected nodes (neurons) organized in layers:
+
+- **Input Layer**: Receives raw numerical representations (pixels, audio frequencies, tokenized text).
+- **Hidden Layers**: Perform mathematical transformations (matrix multiplications, activations) to extract increasingly abstract features.
+- **Output Layer**: Produces probabilities or target classifications (e.g., "Is this an image of a cat?").
+
+### The Training Loop: Forward Pass & Backpropagation
+1. **Weights & Biases**: Each connection in a neural network has an assigned numerical weight.
+2. **Loss Function**: When the model makes a prediction, the loss function measures the numerical discrepancy between the prediction and the ground truth.
+3. **Backpropagation & Gradient Descent**: The network calculates mathematical gradients and nudges every weight slightly to minimize prediction error across billions of parameters.
+
+## Transformers: The Engine Behind Modern Large Language Models (LLMs)
+
+Introduced by Google researchers in 2017, the **Transformer architecture** revolutionized natural language processing through the **Self-Attention mechanism**.
+
+Unlike older sequential recurrent architectures (RNNs), Transformers:
+- Process entire paragraphs or sentences simultaneously in parallel.
+- Calculate dynamic mathematical attention weights between every word in a sentence, capturing nuanced grammatical relationships and context.
+
+## Practical Everyday Applications
+
+- **Healthcare**: Analyzing radiological MRI scans to detect early-stage anomalies with superhuman precision.
+- **Software Engineering**: Assisting developers with automated code completion, refactoring, and bug discovery.
+- **Autonomous Systems**: Real-time sensor fusion combining LiDAR, radar, and camera feeds for self-driving vehicles.
+- **Personalized Recommendations**: Dynamic content ranking algorithms powering modern streaming and discovery platforms.
+
+## Summary
+AI is not conscious or magical—it is sophisticated statistical modeling and linear algebra accelerated by high-performance GPUs. As foundation models become faster and more energy-efficient, AI will continue to augment human capability across every discipline.`;
+
+const gpuArticle = `# How Do GPUs Render Video Games? The Graphics Pipeline
+
+When you play a modern video game at 60 or 120 frames per second, your computer's Graphics Processing Unit (GPU) performs trillions of mathematical calculations every second to construct each frame. Let's trace how game code transforms into realistic 3D imagery.
+
+## CPU vs. GPU: Architectural Differences
+
+To understand graphics rendering, we must understand why GPUs are uniquely suited for rendering:
+
+- **CPU (Central Processing Unit)**: Optimized for sequential execution with 8 to 24 high-clock-speed cores designed for complex logic and branching decisions.
+- **GPU (Graphics Processing Unit)**: Massive parallel computing architecture containing thousands of smaller arithmetic logic units (ALUs) engineered to perform identical mathematical operations on millions of pixels simultaneously.
+
+## The 3D Graphics Rendering Pipeline
+
+Rendering a 3D scene onto a flat 2D monitor involves a series of sequential stages called the **Graphics Pipeline**:
+
+\`\`\`
+3D Scene Data ➔ Vertex Processing ➔ Primitive Assembly & Clipping ➔ Rasterization ➔ Fragment / Pixel Shading ➔ Frame Buffer Display
+\`\`\`
+
+### 1. Vertex Processing & 3D Geometry
+Every 3D object in a game (characters, terrain, vehicles) is composed of a polygon mesh made of triangles. Each triangle corner is a **vertex** with $(X, Y, Z)$ coordinates, texture coordinates $(U, V)$, and lighting normals.
+- The **Vertex Shader** applies mathematical matrix transforms to convert 3D world coordinates into camera-space perspective coordinates.
+
+### 2. Primitive Assembly, Culling & Clipping
+The GPU groups vertices into triangular faces. It automatically discards triangles that are:
+- Located outside the camera's field of view (**Clipping**).
+- Facing away from the camera lens (**Back-Face Culling**).
+
+### 3. Rasterization: Geometry to Pixels
+Triangles are mathematical vectors, but screens display discreet pixel grids. During **rasterization**, the hardware interpolates triangle boundaries to determine which exact monitor pixels fall inside each polygon.
+
+### 4. Fragment (Pixel) Shading & Lighting
+The **Pixel Shader** calculates the final color, specular reflection, roughness, and shadow values for every rasterized pixel. It samples high-resolution texture maps and calculates dynamic light equations (such as PBR - Physically Based Rendering).
+
+### 5. Depth Testing & Alpha Blending
+Using the **Z-Buffer** (depth buffer), the GPU ensures foreground objects properly occlude background geometry without graphical clipping artifacts.
+
+## Modern Graphics Innovations
+
+### Real-Time Ray Tracing (DXR / Vulkan RT)
+Traditional rasterization approximates lighting using tricks. **Ray Tracing** simulates physical photons by shooting millions of simulated light rays from the camera into the scene, calculating realistic reflections, ambient occlusion, and global illumination.
+
+### AI Upscaling (DLSS / FSR / XeSS)
+Modern GPUs render games at lower internal resolutions (e.g. 1080p) and employ deep learning convolutional autoencoders or temporal algorithms to reconstruct a razor-sharp 4K image with minimal performance loss.
+
+## Conclusion
+Modern GPU graphics rendering is one of computer engineering's greatest achievements—combining parallel silicon hardware, real-time shaders, and machine-learning upscalers to deliver lifelike visual worlds in milliseconds.`;
+
+const cloudArticle = `# Cloud Computing Fundamentals: IaaS, PaaS, and Serverless
+
+Modern digital infrastructure runs on the Cloud. From streaming services to global banking networks, businesses have transitioned from physical on-premise server rooms to distributed cloud computing platforms.
+
+## What is Cloud Computing?
+
+Cloud computing is the on-demand delivery of compute power, database storage, applications, and IT resources over the internet with pay-as-you-go pricing. Rather than purchasing and maintaining physical servers, organizations lease virtualized computing capacity from providers like Google Cloud (GCP), Amazon Web Services (AWS), and Microsoft Azure.
+
+## The Three Primary Cloud Service Models
+
+### 1. Infrastructure as a Service (IaaS)
+- **What it is**: Provides fundamental compute blocks including virtual machines, block storage, and virtual private cloud (VPC) networking.
+- **User Responsibility**: Operating system configuration, security patching, application runtime, and middleware.
+- **Examples**: Amazon EC2, Google Compute Engine, Azure VMs.
+
+### 2. Platform as a Service (PaaS)
+- **What it is**: Provides a pre-configured execution environment where developers simply deploy application source code without managing underlying operating systems or virtual server instances.
+- **User Responsibility**: Application business logic and database schema design.
+- **Examples**: Google App Engine, Vercel, Heroku, AWS Elastic Beanstalk.
+
+### 3. Software as a Service (SaaS)
+- **What it is**: Complete, centrally hosted application software accessible directly through web browsers or APIs.
+- **Examples**: Google Workspace, Microsoft 365, Slack, Salesforce.
+
+## The Rise of Serverless & Edge Computing
+
+In traditional setups, developers must provision server capacity in advance. In a **Serverless architecture** (such as AWS Lambda or Google Cloud Functions):
+- Code executes only when triggered by an HTTP event or queue message.
+- Providers scale compute from zero to thousands of concurrent executions instantaneously.
+- You pay strictly for CPU execution milliseconds consumed.
+
+**Edge Computing** pushes this concept even further by distributing serverless execution across hundreds of global points of presence (PoPs) located close to end-users, cutting latency down to sub-10ms.
+
+## Key Benefits of Cloud Adoption
+
+- **Elastic Scalability**: Instantly scale up during traffic spikes and scale down during quiet hours.
+- **High Availability & Disaster Recovery**: Geographic multi-region redundancy protects against hardware faults.
+- **Cost Optimization**: Eliminates massive upfront capital expenditures (CapEx) in favor of predictable operational expenses (OpEx).
+
+## Conclusion
+Whether you are building a simple portfolio, an e-commerce platform, or an enterprise SaaS application, leveraging cloud infrastructure allows development teams to focus on delivering product value rather than managing physical hardware.`;
 
 export const ARTICLES: Article[] = [
   {
@@ -223,7 +211,7 @@ export const ARTICLES: Article[] = [
     slug: 'how-does-5g-work',
     title: 'How Does 5G Work? A Complete Beginner\'s Guide',
     subtitle: 'Understanding fifth-generation wireless technology from the ground up',
-    excerpt: 'Learn how 5G networks function, from spectrum bands and base stations to the technology that makes it all possible. A complete technical guide written for beginners.',
+    excerpt: 'Learn how 5G networks function, from spectrum bands and base stations to Massive MIMO and Beamforming. A comprehensive technical guide.',
     content: fiveGArticle,
     category: 'Mobile',
     tags: ['5G', 'wireless', 'networking', 'mobile-technology', 'telecommunications'],
@@ -231,7 +219,7 @@ export const ARTICLES: Article[] = [
     featured_image: '/images/5g-hero.jpg',
     featured_image_alt: '5G network infrastructure and connectivity visualization',
     publication_date: '2024-01-15',
-    reading_time: 12,
+    reading_time: 8,
     status: 'published',
     seo_title: 'How Does 5G Work? Complete Technical Guide for Beginners',
     seo_description: 'Comprehensive guide explaining 5G technology, spectrum bands, latency, MIMO, beamforming, and real-world applications.',
@@ -240,72 +228,110 @@ export const ARTICLES: Article[] = [
   {
     id: '2',
     slug: 'artificial-intelligence-explained',
-    title: 'Artificial Intelligence Explained: A Beginner\'s Guide',
-    subtitle: 'Understanding AI, machine learning, and neural networks',
-    excerpt: 'Demystify artificial intelligence. Learn how AI works, the difference between AI and machine learning, and what neural networks actually do.',
-    content: 'This is a placeholder for the AI article content. Full content coming soon.',
+    title: 'Artificial Intelligence Explained: A Complete Beginner\'s Guide',
+    subtitle: 'Understanding AI, machine learning, neural networks, and transformer models',
+    excerpt: 'Demystify artificial intelligence. Learn how neural networks learn, what transformer architectures do, and how modern AI transforms our world.',
+    content: aiArticle,
     category: 'AI',
-    tags: ['artificial-intelligence', 'machine-learning', 'technology'],
+    tags: ['artificial-intelligence', 'machine-learning', 'neural-networks', 'deep-learning', 'transformers'],
     author: 'TechKnowledge Editorial',
     featured_image: '/images/ai-hero.jpg',
-    featured_image_alt: 'Artificial intelligence and neural networks concept',
-    publication_date: '2024-01-10',
-    reading_time: 8,
+    featured_image_alt: 'Artificial intelligence and neural networks concept visualization',
+    publication_date: '2024-01-18',
+    reading_time: 9,
     status: 'published',
-    seo_title: 'Artificial Intelligence Explained: Beginner\'s Guide',
-    seo_description: 'Learn how artificial intelligence works, the basics of machine learning, and why AI is transforming society.',
+    seo_title: 'Artificial Intelligence Explained: Complete Beginner\'s Guide',
+    seo_description: 'Learn how artificial intelligence works, the basics of neural networks, machine learning, and transformer models.',
+    canonical_url: 'https://techknowledge.com/article/artificial-intelligence-explained',
   },
   {
     id: '3',
     slug: 'gpu-rendering-gaming',
-    title: 'How Do GPUs Render Video Games?',
-    subtitle: 'The graphics pipeline that powers modern gaming',
-    excerpt: 'Explore the journey of pixels from game code to your screen. Understand how GPUs transform game data into stunning visuals.',
-    content: 'This is a placeholder for the GPU rendering article content. Full content coming soon.',
+    title: 'How Do GPUs Render Video Games? The Graphics Pipeline',
+    subtitle: 'The hardware architecture and graphics pipeline powering modern gaming visuals',
+    excerpt: 'Explore the journey of 3D geometry to screen pixels. Understand vertex shaders, rasterization, ray tracing, and AI upscalers.',
+    content: gpuArticle,
     category: 'Gaming',
-    tags: ['GPU', 'graphics', 'gaming-technology', 'hardware'],
+    tags: ['GPU', 'graphics', 'gaming-technology', 'hardware', 'ray-tracing'],
     author: 'TechKnowledge Editorial',
     featured_image: '/images/gpu-hero.jpg',
-    featured_image_alt: 'GPU graphics rendering pipeline',
-    publication_date: '2024-01-05',
+    featured_image_alt: 'GPU graphics rendering pipeline and 3D visual processing',
+    publication_date: '2024-01-20',
     reading_time: 10,
     status: 'published',
-    seo_title: 'How Do GPUs Render Video Games? Complete Explanation',
-    seo_description: 'Understand the graphics pipeline, rendering techniques, and how GPUs create the visuals in modern video games.',
+    seo_title: 'How Do GPUs Render Video Games? Graphics Pipeline Explained',
+    seo_description: 'Understand the GPU graphics pipeline, vertex shading, rasterization, ray tracing, and modern DLSS rendering techniques.',
+    canonical_url: 'https://techknowledge.com/article/gpu-rendering-gaming',
+  },
+  {
+    id: '4',
+    slug: 'cloud-computing-fundamentals',
+    title: 'Cloud Computing Fundamentals: IaaS, PaaS, and Serverless',
+    subtitle: 'A clear guide to cloud architecture, distributed systems, and edge computing',
+    excerpt: 'Understand cloud computing infrastructure, the difference between IaaS, PaaS, and Serverless, and why modern web apps rely on the cloud.',
+    content: cloudArticle,
+    category: 'Cloud',
+    tags: ['cloud-computing', 'serverless', 'devops', 'aws', 'gcp', 'infrastructure'],
+    author: 'TechKnowledge Editorial',
+    featured_image: '/images/cloud-hero.jpg',
+    featured_image_alt: 'Cloud computing server networks and global infrastructure',
+    publication_date: '2024-01-22',
+    reading_time: 7,
+    status: 'published',
+    seo_title: 'Cloud Computing Fundamentals: IaaS, PaaS, & Serverless Explained',
+    seo_description: 'Learn the core models of cloud computing, serverless architectures, and how modern distributed applications run.',
+    canonical_url: 'https://techknowledge.com/article/cloud-computing-fundamentals',
   },
 ];
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'articles.json');
 
-function ensureDataFile() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
-  }
+// In-memory cache to ensure serverless platforms (Vercel / Cloudflare) run safely without filesystem errors
+let memoryArticles: Article[] | null = null;
 
-  if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(ARTICLES, null, 2), 'utf8');
+function ensureDataFile() {
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    if (!fs.existsSync(DATA_FILE)) {
+      fs.writeFileSync(DATA_FILE, JSON.stringify(ARTICLES, null, 2), 'utf8');
+      memoryArticles = [...ARTICLES];
+    }
+  } catch {
+    // Read-only filesystem on serverless; fallback to memoryArticles
+    if (!memoryArticles) {
+      memoryArticles = [...ARTICLES];
+    }
   }
 }
 
 function readStoredArticles(): Article[] {
   ensureDataFile();
-
   try {
-    const file = fs.readFileSync(DATA_FILE, 'utf8');
-    const parsed = JSON.parse(file) as Article[];
-    if (!Array.isArray(parsed)) {
-      return ARTICLES;
+    if (fs.existsSync(DATA_FILE)) {
+      const file = fs.readFileSync(DATA_FILE, 'utf8');
+      const parsed = JSON.parse(file) as Article[];
+      if (Array.isArray(parsed)) {
+        memoryArticles = parsed;
+        return parsed;
+      }
     }
-    return parsed;
   } catch {
-    return ARTICLES;
+    // Ignore filesystem read failure, use memoryArticles
   }
+  return memoryArticles || [];
 }
 
 function writeStoredArticles(articles: Article[]) {
-  ensureDataFile();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(articles, null, 2), 'utf8');
+  memoryArticles = articles;
+  try {
+    ensureDataFile();
+    fs.writeFileSync(DATA_FILE, JSON.stringify(articles, null, 2), 'utf8');
+  } catch {
+    // Graceful fallback for read-only serverless lambdas
+  }
 }
 
 export function getArticleList(): Article[] {
@@ -325,7 +351,7 @@ export function getArticleBySlug(slug: string): Article | undefined {
 }
 
 export function getArticlesByCategory(category: string): Article[] {
-  return getArticleList().filter(article => article.category === category && article.status === 'published');
+  return getArticleList().filter(article => article.category.toLowerCase() === category.toLowerCase() && article.status === 'published');
 }
 
 export function searchArticles(query: string): Article[] {
@@ -368,6 +394,40 @@ export function createArticleRecord(input: Partial<Article>): Article {
 
   const next = [article, ...list];
   writeStoredArticles(next);
+
+  // Cloud Database Sync
+  if (isCloudDatabaseConfigured()) {
+    executeSql(`
+      INSERT INTO articles (id, slug, title, subtitle, excerpt, content, category, tags, author, featured_image, featured_image_alt, publication_date, updated_date, reading_time, status, seo_title, seo_description, canonical_url, social_image)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        slug = excluded.slug,
+        title = excluded.title,
+        subtitle = excluded.subtitle,
+        excerpt = excluded.excerpt,
+        content = excluded.content,
+        category = excluded.category,
+        tags = excluded.tags,
+        author = excluded.author,
+        featured_image = excluded.featured_image,
+        featured_image_alt = excluded.featured_image_alt,
+        publication_date = excluded.publication_date,
+        updated_date = excluded.updated_date,
+        reading_time = excluded.reading_time,
+        status = excluded.status,
+        seo_title = excluded.seo_title,
+        seo_description = excluded.seo_description,
+        canonical_url = excluded.canonical_url,
+        social_image = excluded.social_image;
+    `, [
+      article.id, article.slug, article.title, article.subtitle || '', article.excerpt || '',
+      article.content, article.category, JSON.stringify(article.tags || []), article.author,
+      article.featured_image, article.featured_image_alt, article.publication_date, article.updated_date || '',
+      article.reading_time, article.status, article.seo_title, article.seo_description,
+      article.canonical_url || '', article.social_image || ''
+    ]).catch(err => console.error('Cloud DB sync error:', err));
+  }
+
   return article;
 }
 
@@ -392,12 +452,53 @@ export function updateArticleRecord(input: Partial<Article>): Article {
 
   const next = list.map(article => article.id === input.id ? updated : article);
   writeStoredArticles(next);
+
+  // Cloud Database Sync
+  if (isCloudDatabaseConfigured()) {
+    executeSql(`
+      INSERT INTO articles (id, slug, title, subtitle, excerpt, content, category, tags, author, featured_image, featured_image_alt, publication_date, updated_date, reading_time, status, seo_title, seo_description, canonical_url, social_image)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET
+        slug = excluded.slug,
+        title = excluded.title,
+        subtitle = excluded.subtitle,
+        excerpt = excluded.excerpt,
+        content = excluded.content,
+        category = excluded.category,
+        tags = excluded.tags,
+        author = excluded.author,
+        featured_image = excluded.featured_image,
+        featured_image_alt = excluded.featured_image_alt,
+        publication_date = excluded.publication_date,
+        updated_date = excluded.updated_date,
+        reading_time = excluded.reading_time,
+        status = excluded.status,
+        seo_title = excluded.seo_title,
+        seo_description = excluded.seo_description,
+        canonical_url = excluded.canonical_url,
+        social_image = excluded.social_image;
+    `, [
+      updated.id, updated.slug, updated.title, updated.subtitle || '', updated.excerpt || '',
+      updated.content, updated.category, JSON.stringify(updated.tags || []), updated.author,
+      updated.featured_image, updated.featured_image_alt, updated.publication_date, updated.updated_date || '',
+      updated.reading_time, updated.status, updated.seo_title, updated.seo_description,
+      updated.canonical_url || '', updated.social_image || ''
+    ]).catch(err => console.error('Cloud DB sync error:', err));
+  }
+
   return updated;
 }
 
 export function deleteArticleById(id: string): void {
   const next = getArticleList().filter(article => article.id !== id);
   writeStoredArticles(next);
+
+  if (isCloudDatabaseConfigured()) {
+    executeSql('DELETE FROM articles WHERE id = ?;', [id]).catch(err =>
+      console.error('Cloud DB delete error:', err)
+    );
+  }
 }
 
 export { CATEGORIES };
+

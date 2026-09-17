@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Disclaimer',
-  description: 'TechKnowledge Disclaimer',
+  description: 'TechKnowledge Disclaimer - Information regarding content accuracy, warranties, and liability.',
 };
 
 export default function DisclaimerPage() {
@@ -18,71 +18,38 @@ export default function DisclaimerPage() {
       {/* Content */}
       <div className="container-custom py-16">
         <div className="max-w-3xl mx-auto prose dark:prose-invert">
-          <h2>Content Disclaimer</h2>
-          <p>
-            The information provided on TechKnowledge is for educational and informational purposes only. 
-            While we strive to ensure the accuracy of our content, we do not guarantee that all information is complete, 
-            accurate, current, or reliable.
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
 
-          <h2>No Professional Advice</h2>
+          <h2>1. Educational & Informational Purposes Only</h2>
           <p>
-            The content on this website should not be considered as professional advice. TechKnowledge is not a substitute for:
-          </p>
-          <ul>
-            <li>Professional technical consultation</li>
-            <li>Legal advice</li>
-            <li>Medical advice</li>
-            <li>Financial advice</li>
-            <li>Security consultation</li>
-          </ul>
-
-          <p>
-            Always consult with qualified professionals before making any decisions based on information from this website.
+            The technical guides, tutorials, and articles on TechKnowledge are published solely for educational, informational, and research purposes. 
+            While we strive to ensure that all information is accurate and up-to-date, technology frameworks, protocols, and APIs evolve rapidly. 
+            We make no representation or warranty of any kind regarding accuracy, adequacy, validity, or completeness.
           </p>
 
-          <h2>External Links</h2>
+          <h2>2. No Professional or Security Consultation</h2>
           <p>
-            TechKnowledge is not responsible for the content, accuracy, or practices of any external websites linked from our site. 
-            Access to external websites is at your own risk.
+            The content provided on this website is not intended as professional cybersecurity, legal, financial, or architectural advice. 
+            Implementing code, infrastructure changes, or cryptographic systems in production should always be validated by qualified software engineers and security professionals.
           </p>
 
-          <h2>Technology Changes</h2>
+          <h2>3. External Links & Affiliations</h2>
           <p>
-            Technology is constantly evolving. Information on this website may become outdated. We recommend verifying critical information 
-            with the most current sources, especially for rapidly changing topics like AI, 5G, and cybersecurity.
+            TechKnowledge may contain links to external third-party websites, tools, documentation, or services. 
+            We do not warrant, endorse, or assume responsibility for the accuracy or reliability of any information offered by third-party websites.
           </p>
 
-          <h2>No Warranty</h2>
+          <h2>4. Use at Your Own Risk</h2>
           <p>
-            TechKnowledge provides this website "as-is" without any warranties, expressed or implied. 
-            We do not guarantee:
-          </p>
-          <ul>
-            <li>Uninterrupted or error-free access</li>
-            <li>That any defects will be corrected</li>
-            <li>That the website is free from viruses or other harmful components</li>
-          </ul>
-
-          <h2>Limitation of Liability</h2>
-          <p>
-            In no event shall TechKnowledge be liable for any direct, indirect, incidental, special, or consequential damages 
-            resulting from the use of or inability to use the content on this website.
+            Under no circumstance shall TechKnowledge have any liability to you for any loss or damage of any kind incurred as a result of the use of this site 
+            or reliance on any information provided. Your use of the site and reliance on any information is solely at your own risk.
           </p>
 
-          <h2>User Responsibility</h2>
+          <h2>5. Contact Us</h2>
           <p>
-            You are responsible for:
-          </p>
-          <ul>
-            <li>Evaluating the accuracy and usefulness of information</li>
-            <li>Verifying critical information with authoritative sources</li>
-            <li>Using this information appropriately and lawfully</li>
-          </ul>
-
-          <p className="text-sm text-gray-600 dark:text-gray-400 pt-8">
-            This is a placeholder disclaimer. Please consult with legal counsel to create a disclaimer that complies with 
-            applicable laws and regulations in your jurisdiction.
+            If you have questions regarding this Disclaimer, please reach out via our <a href="/contact">Contact Page</a>.
           </p>
         </div>
       </div>
